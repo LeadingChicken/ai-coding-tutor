@@ -12,7 +12,7 @@ llm = ChatOpenAI(
     api_key=settings.OPENAI_API_KEY
 )
 
-# Prompt template chuẩn LangChain
+# Prompt template
 AGENT_PROMPT_TEMPLATE = """Bạn là một AI tutor chuyên nghiệp về lập trình.
 Nhiệm vụ của bạn là giúp học viên học lập trình và giải quyết các vấn đề code.
 
@@ -27,18 +27,32 @@ Lịch sử trò chuyện:
 Khi phân tích và đưa ra quyết định, hãy:
 1. Đọc và hiểu yêu cầu của học viên.
 2. Xem xét ngữ cảnh từ lịch sử trò chuyện nếu có.
-3. Nếu học viên yêu cầu review, giải thích hoặc chỉnh sửa code, hãy dùng read_code để đọc code từ sandbox.
-4. KHÔNG gọi read_code nhiều hơn một lần trong một phiên.
-5. Luôn tuân theo định dạng:
-Thought: ...
-Action: ...
-Action Input: ...
-hoặc
-Final Answer: ...
+3. Nếu học viên yêu cầu review, giải thích hoặc chỉnh sửa code của họ, hãy dùng read_code để đọc code từ sandbox.
+4. Nếu được học viên yêu cầu gợi ý những bài tập, hãy đưa ra những bài tập mà bạn nghĩ là phù hợp nhất với trình độ của học viên.
+5. Nếu bạn được học viên bảo gợi ý cách làm bài tập thì cố gắng đưa ra những gợi ý mà bạn nghĩ là tốt nhất. Đừng đưa họ code mẫu, mà hãy đưa ra những gợi ý mà bạn nghĩ là tốt nhất.
+6. Nếu như bạn cần đọc terminal output (ví dụ như bạn cần đọc lỗi hay sửa lỗi cho học viên), hãy sử dụng read_terminal_output.
+7. LUÔN LUÔN tuân theo định dạng sau một cách chính xác:
+
+Thought: suy nghĩ về những gì bạn sẽ làm
+Action: tên công cụ bạn sẽ sử dụng (nếu cần)
+Action Input: input cho công cụ (nếu cần)
+
+HOẶC
+
+Final Answer: câu trả lời cuối cùng (hãy tổng hợp lại toàn bộ câu trả lời của bạn từ đầu bao gồm cả Thought)
+
+LƯU Ý QUAN TRỌNG:
+- Nếu bạn cần sử dụng công cụ, PHẢI có cả Action và Action Input
+- Nếu không cần sử dụng công cụ, PHẢI kết thúc bằng Final Answer
+- KHÔNG được trả lời mà thiếu Thought ở đầu
+- KHÔNG được trả lời tự do không theo format
+- Khi trả lời có chứa code mẫu, PHẢI đặt code trong block ```python:copyable và kết thúc bằng ```. Ví dụ:
+  ```python:copyable
+  print("Hello World")
+  ```
 
 Câu hỏi: {input}
-{agent_scratchpad}
-"""
+{agent_scratchpad}"""
 
 # Prompt object
 prompt = PromptTemplate(
@@ -56,31 +70,34 @@ def format_chat_history(history: List[Dict[str, Any]]) -> str:
         formatted.append(f"{role}: {msg.get('content', '')}")
     return "\n".join(formatted)
 
-def read_code_func(code):
-    print(f"[DEBUG] Code nhận được trong tool: {repr(code)}")
-    if code and code.strip() != "":
-        return code.strip()
-    else:
-        return "# Không có code nào trong sandbox để đọc."
-
-# Hàm chính
-def get_agent_response(message: str, code: str = None, history: List[Dict[str, Any]] = None) -> str:
+def get_agent_response(message: str, code: str = None, history: List[Dict[str, Any]] = None, terminal_output: str = None) -> str:
     try:
         # Format history nếu có
         chat_history_str = format_chat_history(history) if history else "Chưa có lịch sử trò chuyện."
 
-        def read_code_func(_):
-            print(f"[DEBUG] Code nhận được trong tool: {repr(code)}")
-            if code and code.strip() != "":
-                return code.strip()
-            else:
-                return "# Không có code nào trong sandbox để đọc."
+        # Tạo closure để giữ biến code và terminal_output
+        def read_code_with_input(input_str=None):
+            # Bỏ qua input_str, luôn trả về code nếu có
+            if code:
+                return f"```python\n{code.strip()}\n```"
+            return "Không có code nào trong sandbox để đọc."
+
+        def read_terminal_output(input_str=None):
+            # Bỏ qua input_str, luôn trả về terminal output nếu có
+            if terminal_output:
+                return f"Terminal Output:\n```\n{terminal_output.strip()}\n```"
+            return "Không có terminal output nào để đọc."
 
         tools = [
             Tool(
                 name="read_code",
-                func=read_code_func,
-                description="Sử dụng tool này khi bạn cần đọc code từ sandbox của học viên."
+                func=read_code_with_input,
+                description="Đọc code từ sandbox của học viên. Trả về code dưới dạng markdown Python block."
+            ),
+            Tool(
+                name="read_terminal_output",
+                func=read_terminal_output,
+                description="Đọc terminal output từ lần chạy code gần nhất của học viên. Trả về output dưới dạng markdown code block."
             )
         ]
 
@@ -109,7 +126,9 @@ def get_agent_response(message: str, code: str = None, history: List[Dict[str, A
             "agent_scratchpad": ""
         })
 
-        return response["output"]
+        # Thêm metadata cho code blocks
+        output = response["output"]
+        return output
 
     except Exception as e:
         return f"Xin lỗi, đã có lỗi xảy ra: {str(e)}"

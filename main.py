@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from typing import List, Optional
 
 from app.models import Message, CodeRequest
 from app.agent import get_agent_response
@@ -22,6 +24,12 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Initialize templates
 templates = Jinja2Templates(directory="templates")
 
+class ChatRequest(BaseModel):
+    message: str
+    code: Optional[str] = None
+    history: Optional[List[dict]] = None
+    terminal_output: Optional[str] = None
+
 @app.get("/", response_class=HTMLResponse)
 async def chat_page(request: Request):
     return templates.TemplateResponse(
@@ -30,21 +38,14 @@ async def chat_page(request: Request):
     )
 
 @app.post("/chat")
-async def chat_endpoint(
-    message: str = Form(...),
-    code: str = Form(None),
-    history: str = Form(None)
-):
-    # Convert history from JSON string to list
-    message_history = []
-    if history:
-        try:
-            message_history = json.loads(history)
-        except:
-            pass
-    
-    # Get response from agent, passing both message and code
-    response = get_agent_response(message, code, message_history)
+async def chat_endpoint(request: ChatRequest):
+    # Get response from agent, passing message, code, and terminal output
+    response = get_agent_response(
+        message=request.message,
+        code=request.code,
+        history=request.history or [],
+        terminal_output=request.terminal_output
+    )
     
     return {
         "response": response
