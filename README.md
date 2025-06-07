@@ -51,9 +51,9 @@ cp .env.example .env
 File `.env` cần có các biến môi trường sau:
 
 ```
-OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-4-1106-preview
-OPENAI_TEMPERATURE=0.1
+ANTHROPIC_API_KEY=your_api_key_here
+ANTHROPIC_TEMPERATURE=0.7
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 ```
 
 ⚠️ **Lưu ý bảo mật**:

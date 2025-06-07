@@ -1,15 +1,16 @@
 from typing import List, Dict, Any
 from langchain.agents import Tool, AgentExecutor, create_react_agent
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from langchain.prompts import PromptTemplate
 from langchain.callbacks import StdOutCallbackHandler
 from .config import settings
 
 # Tạo LLM
-llm = ChatOpenAI(
-    model_name=settings.OPENAI_MODEL,
-    temperature=settings.OPENAI_TEMPERATURE,
-    api_key=settings.OPENAI_API_KEY
+llm = ChatAnthropic(
+    model_name="claude-3-5-sonnet-20241022",
+    anthropic_api_key=settings.ANTHROPIC_API_KEY,
+    temperature=settings.ANTHROPIC_TEMPERATURE,
+    max_tokens=4096
 )
 
 # Prompt template
