@@ -13,7 +13,7 @@ AI Coding Tutor là một ứng dụng web tương tác giúp học viên học 
 ## Yêu cầu hệ thống
 
 - Python 3.8+
-- OpenAI API key
+- Anthropic API key
 
 ## Cài đặt
 
