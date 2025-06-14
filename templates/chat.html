@@ -41,7 +41,7 @@
         overflow: hidden;
       }
 
-      .chat-container {
+      .exercise-container {
         flex-grow: 1;
         overflow-y: auto;
         padding: 1rem;
@@ -49,15 +49,15 @@
         scrollbar-color: #cbd5e1 transparent;
       }
 
-      .chat-container::-webkit-scrollbar {
+      .exercise-container::-webkit-scrollbar {
         width: 8px;
       }
 
-      .chat-container::-webkit-scrollbar-track {
+      .exercise-container::-webkit-scrollbar-track {
         background: transparent;
       }
 
-      .chat-container::-webkit-scrollbar-thumb {
+      .exercise-container::-webkit-scrollbar-thumb {
         background-color: #cbd5e1;
         border-radius: 4px;
       }
@@ -110,116 +110,32 @@
         color: #ef4444;
       }
 
-      .message {
-        margin: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        max-width: 80%;
-      }
-
-      .user-message {
-        background-color: #4f46e5;
-        color: white;
-        margin-left: auto;
-      }
-
-      .bot-message {
+      .exercise-section {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
         background-color: #f3f4f6;
-        color: #1f2937;
+        border-radius: 0.5rem;
       }
 
-      /* Markdown styles */
-      .bot-message pre {
+      .exercise-section h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+      }
+
+      .exercise-section pre {
         background-color: #f6f8fa;
         border-radius: 6px;
         padding: 16px;
         overflow-x: auto;
         margin: 8px 0;
-        position: relative;
       }
 
-      .code-actions {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: flex;
-        gap: 4px;
-        opacity: 0;
-        transition: opacity 0.2s;
-      }
-
-      .bot-message pre:hover .code-actions {
-        opacity: 1;
-      }
-
-      .code-button {
-        background-color: #4f46e5;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-
-      .code-button:hover {
-        background-color: #4338ca;
-      }
-
-      .notification {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        padding: 12px 24px;
-        background-color: #10b981;
-        color: white;
-        border-radius: 6px;
-        font-size: 14px;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.3s, transform 0.3s;
-        z-index: 1000;
-      }
-
-      .notification.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .use-code-button {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background-color: #4f46e5;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        cursor: pointer;
-        opacity: 0;
-        transition: opacity 0.2s;
-      }
-
-      .bot-message pre:hover .use-code-button {
-        opacity: 1;
-      }
-
-      .use-code-button:hover {
-        background-color: #4338ca;
-      }
-
-      .bot-message code {
+      .exercise-section code {
         font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
           Liberation Mono, monospace;
         font-size: 0.9em;
-        padding: 0.2em 0.4em;
-        background-color: rgba(175, 184, 193, 0.2);
-        border-radius: 6px;
-      }
-
-      .bot-message pre code {
-        background-color: transparent;
-        padding: 0;
       }
 
       .controls {
@@ -237,13 +153,27 @@
         transition: all 0.2s;
       }
 
+      .button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       .run-button {
         background-color: #22c55e;
         color: white;
       }
 
-      .run-button:hover {
+      .run-button:hover:not(:disabled) {
         background-color: #16a34a;
+      }
+
+      .test-button {
+        background-color: #4f46e5;
+        color: white;
+      }
+
+      .test-button:hover:not(:disabled) {
+        background-color: #4338ca;
       }
 
       .clear-button {
@@ -251,233 +181,240 @@
         color: white;
       }
 
-      .clear-button:hover {
+      .clear-button:hover:not(:disabled) {
         background-color: #dc2626;
       }
 
-      .message-bubble {
-        max-width: 80%;
-        margin: 8px;
-        padding: 12px;
-        border-radius: 12px;
-        line-height: 1.5;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-word;
+      /* Loading screen styles */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
       }
 
-      .message-bubble pre {
-        background-color: #1e1e1e;
-        border-radius: 6px;
-        padding: 12px;
-        margin: 8px 0;
-        overflow-x: auto;
-        max-width: 100%;
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .loading-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+      }
+
+      .loading-text {
+        color: #1f2937;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Disable generate button while loading */
+      .generate-button:disabled {
+        background-color: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      /* Tab styles */
+      .tab-container {
+        height: 40%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .tab-buttons {
+        display: flex;
+        border-bottom: 1px solid #374151;
+        background: #1e1e1e;
+        padding: 0.5rem 1rem 0 1rem;
+      }
+
+      .tab-button {
+        padding: 0.5rem 1rem;
+        color: #9ca3af;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+
+      .tab-button.active {
+        color: white;
+        border-bottom-color: #4f46e5;
+      }
+
+      .tab-button:hover:not(.active) {
+        color: #d1d5db;
+        border-bottom-color: #6b7280;
+      }
+
+      .tab-content {
+        flex-grow: 1;
+        display: none;
+        background: #1e1e1e;
+        flex-direction: column;
+      }
+
+      .tab-content.active {
+        display: flex;
+      }
+
+      .terminal-output {
+        flex-grow: 1;
+        padding: 1rem;
+        color: white;
+        font-family: 'Consolas', 'Monaco', monospace;
+        overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: #4b5563 transparent;
       }
 
-      .message-bubble pre::-webkit-scrollbar {
-        height: 8px;
+      .terminal-output pre {
+        margin: 0;
+        font-family: inherit;
+        color: inherit;
+        white-space: pre-wrap;
       }
 
-      .message-bubble pre::-webkit-scrollbar-track {
-        background: transparent;
+      .terminal-output .error {
+        color: #ef4444;
       }
 
-      .message-bubble pre::-webkit-scrollbar-thumb {
-        background-color: #4b5563;
-        border-radius: 4px;
+      .terminal-output .success {
+        color: #22c55e;
       }
 
-      .message-bubble code {
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 0.9em;
-        padding: 0.2em 0.4em;
-        border-radius: 4px;
-      }
-
-      .message-bubble pre code {
-        padding: 0;
-      }
-
-      .thinking {
+      .tab-controls {
         display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px;
-        color: #6b7280;
-      }
-
-      .thinking-dots {
-        display: flex;
-        gap: 4px;
-      }
-
-      .dot {
-        width: 8px;
-        height: 8px;
-        background-color: #6b7280;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out;
-      }
-
-      .dot:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-      .dot:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-
-      @keyframes bounce {
-        0%,
-        80%,
-        100% {
-          transform: scale(0);
-        }
-        40% {
-          transform: scale(1);
-        }
-      }
-
-      /* Suggested prompts styles */
-      .suggested-prompts {
-        margin-bottom: 12px;
-      }
-
-      .suggested-prompts h3 {
-        font-size: 14px;
-        color: #6b7280;
-        margin-bottom: 8px;
-      }
-
-      .prompt-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .prompt-item {
-        background-color: #f3f4f6;
-        color: #4f46e5;
-        padding: 6px 12px;
-        border-radius: 16px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 1px solid #e5e7eb;
-      }
-
-      .prompt-item:hover {
-        background-color: #4f46e5;
-        color: white;
-        border-color: #4f46e5;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #2d2d2d;
+        border-top: 1px solid #374151;
       }
     </style>
   </head>
   <body class="bg-gray-100">
-    <div class="container mx-auto">
-      <h1 class="text-3xl font-bold text-center my-4">AI Programming Tutor</h1>
-
-      <div class="main-container">
-        <!-- Left Panel: Chat -->
-        <div class="left-panel">
-          <div id="chat-messages" class="chat-container">
-            <!-- Messages will be added here -->
+    <div class="flex justify-between items-center bg-white shadow-sm p-4 mb-4">
+      <h1 class="text-2xl font-bold text-gray-800">AI Programming Tutor</h1>
+      <div class="flex gap-4">
+        <a
+          href="/theory"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Study Theory
+        </a>
+      </div>
+    </div>
+    <div class="main-container">
+      <div class="left-panel">
+        <div class="exercise-container">
+          <div class="exercise-section">
+            <h2>Mô tả bài tập</h2>
+            <div id="description"></div>
           </div>
-
-          <div class="border-t border-gray-200 p-4">
-            <div class="suggested-prompts">
-              <h3>Gợi ý câu hỏi:</h3>
-              <div class="prompt-list">
-                <button
-                  class="prompt-item"
-                  onclick="usePrompt('Cho tôi bài tập bất kì')"
-                >
-                  Cho tôi bài tập bất kì
-                </button>
-                <button
-                  class="prompt-item"
-                  onclick="usePrompt('Giải thích về thuật toán sắp xếp')"
-                >
-                  Giải thích về thuật toán sắp xếp
-                </button>
-                <button
-                  class="prompt-item"
-                  onclick="usePrompt('Hướng dẫn tôi về lập trình hướng đối tượng')"
-                >
-                  Hướng dẫn về OOP
-                </button>
-              </div>
-            </div>
-            <form id="chat-form" class="space-y-4">
-              <div>
-                <label
-                  for="message-input"
-                  class="block text-sm font-medium text-gray-700"
-                >
-                  Tin nhắn của bạn:
-                </label>
-                <textarea
-                  id="message-input"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-h-[80px] p-2"
-                  placeholder="Nhập câu hỏi hoặc yêu cầu của bạn..."
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-              >
-                Gửi
-              </button>
-            </form>
+          <div class="exercise-section">
+            <h2>Ví dụ</h2>
+            <div id="example"></div>
+            <div id="example-output"></div>
           </div>
-        </div>
-
-        <!-- Right Panel: Code Editor and Output -->
-        <div class="right-panel">
-          <div class="code-editor" id="code-editor"></div>
-          <div class="output-container" id="output-container">
-            <div id="output"></div>
+          <div class="exercise-section">
+            <h2>Giải thích</h2>
+            <div id="explanation"></div>
           </div>
           <div class="controls">
-            <button id="run-code" class="button run-button">Chạy Code</button>
-            <button id="clear-output" class="button clear-button">
-              Xóa Output
+            <button class="button generate-button" onclick="generateExercise()">
+              Tạo bài tập mới
             </button>
+          </div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="code-editor">
+          <div id="editor" style="height: 100%"></div>
+        </div>
+        <div class="tab-container">
+          <div class="tab-buttons">
+            <button class="tab-button active" onclick="switchTab('output')">
+              Output
+            </button>
+            <button class="tab-button" onclick="switchTab('test')">
+              Kiểm tra
+            </button>
+          </div>
+          <div id="output-tab" class="tab-content active">
+            <div class="terminal-output">
+              <pre id="output"></pre>
+            </div>
+            <div class="tab-controls">
+              <button class="button run-button" onclick="runCode()">
+                Chạy code
+              </button>
+              <button class="button clear-button" onclick="clearOutput()">
+                Xóa output
+              </button>
+            </div>
+          </div>
+          <div id="test-tab" class="tab-content">
+            <div class="terminal-output">
+              <pre id="test-output"></pre>
+            </div>
+            <div class="tab-controls">
+              <button class="button test-button" onclick="runTests()">
+                Kiểm tra bài làm
+              </button>
+              <button class="button clear-button" onclick="clearTestOutput()">
+                Xóa kết quả
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script>
-      const messageContainer = document.getElementById('chat-messages');
-      const chatForm = document.getElementById('chat-form');
-      const messageInput = document.getElementById('message-input');
-      const outputContainer = document.getElementById('output');
-      const runButton = document.getElementById('run-code');
-      const clearButton = document.getElementById('clear-output');
-      let chatHistory = [];
-      let lastTerminalOutput = '';
+    <!-- Add loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <div class="loading-text">Đang tạo bài tập mới...</div>
+      </div>
+    </div>
 
-      // Initialize Monaco Editor
-      require.config({
-        paths: {
-          vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs',
-        },
-      });
-      require(['vs/editor/editor.main'], function () {
-        window.editor = monaco.editor.create(
-          document.getElementById('code-editor'),
-          {
-            value: '# Viết code Python của bạn ở đây\n',
-            language: 'python',
-            theme: 'vs-dark',
-            minimap: { enabled: false },
-            automaticLayout: true,
-          }
-        );
-      });
+    <script>
+      let editor;
+      let currentExercise = null;
+      let isGenerating = false;
+      let currentTab = 'output';
 
       // Initialize marked with syntax highlighting
       marked.setOptions({
@@ -491,322 +428,206 @@
         gfm: true,
       });
 
-      // Add prompt suggestion function
-      function usePrompt(prompt) {
-        const messageInput = document.getElementById('message-input');
-        messageInput.value = prompt;
-        messageInput.focus();
-      }
+      // Initialize Monaco Editor
+      require.config({
+        paths: {
+          vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs',
+        },
+      });
 
-      // Welcome message
-      const welcomeMessage = `Xin chào! Mình là AI Programming Tutor. Mình có thể giúp bạn:
-
-- Review và phân tích code
-- Giải thích các khái niệm lập trình
-- Sửa lỗi và tối ưu code
-- Hướng dẫn giải quyết bài tập
-- Chia sẻ best practices
-
-Bạn có thể bắt đầu bằng cách chọn một trong các gợi ý câu hỏi phía dưới hoặc tự đặt câu hỏi của mình.`;
-
-      function createThinkingIndicator() {
-        const thinking = document.createElement('div');
-        thinking.className = 'thinking';
-        thinking.innerHTML = `
-          <span>Đang suy nghĩ</span>
-          <div class="thinking-dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-          </div>
-        `;
-        return thinking;
-      }
-
-      // Add notification function
-      function showNotification(message) {
-        // Remove existing notification if any
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) {
-          existingNotification.remove();
-        }
-
-        // Create new notification
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        // Show notification
-        setTimeout(() => notification.classList.add('show'), 10);
-
-        // Hide and remove notification after 3 seconds
-        setTimeout(() => {
-          notification.classList.remove('show');
-          setTimeout(() => notification.remove(), 300);
-        }, 3000);
-      }
-
-      function addMessage(content, isUser = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `flex ${
-          isUser ? 'justify-end' : 'justify-start'
-        }`;
-
-        const messageBubble = document.createElement('div');
-        messageBubble.className = `message-bubble ${
-          isUser ? 'user-message' : 'bot-message'
-        }`;
-
-        // Xử lý định dạng agent output
-        if (!isUser) {
-          // Tách các phần của agent output và giữ nguyên khoảng trắng đầu dòng
-          const parts = content.split('\n');
-          let formattedContent = '';
-          let inCodeBlock = false;
-          let currentBlock = [];
-
-          parts.forEach((part, index) => {
-            // Kiểm tra xem có phải là phần bắt đầu của một section mới không
-            if (part.trim().startsWith('Thought:')) {
-              // Xử lý block trước đó nếu có
-              if (currentBlock.length > 0) {
-                formattedContent += currentBlock.join('\n') + '\n\n';
-                currentBlock = [];
-              }
-              inCodeBlock = false;
-              formattedContent += `**💭 Suy nghĩ:**\n${part
-                .replace('Thought:', '')
-                .trimLeft()}\n`;
-            } else if (part.trim().startsWith('Action:')) {
-              if (currentBlock.length > 0) {
-                formattedContent += currentBlock.join('\n') + '\n\n';
-                currentBlock = [];
-              }
-              inCodeBlock = false;
-              formattedContent += `**🔧 Hành động:**\n${part
-                .replace('Action:', '')
-                .trimLeft()}\n`;
-            } else if (part.trim().startsWith('Action Input:')) {
-              if (currentBlock.length > 0) {
-                formattedContent += currentBlock.join('\n') + '\n\n';
-                currentBlock = [];
-              }
-              inCodeBlock = false;
-              formattedContent += `**📥 Input:**\n${part
-                .replace('Action Input:', '')
-                .trimLeft()}\n`;
-            } else if (part.trim().startsWith('Final Answer:')) {
-              if (currentBlock.length > 0) {
-                formattedContent += currentBlock.join('\n') + '\n\n';
-                currentBlock = [];
-              }
-              inCodeBlock = false;
-              formattedContent += `**💡 Kết quả:**\n${part
-                .replace('Final Answer:', '')
-                .trimLeft()}\n`;
-            } else {
-              // Kiểm tra xem có phải là code block không
-              if (part.trim().startsWith('```')) {
-                if (!inCodeBlock) {
-                  // Bắt đầu code block mới
-                  inCodeBlock = true;
-                  currentBlock = [part];
-                } else {
-                  // Kết thúc code block
-                  inCodeBlock = false;
-                  currentBlock.push(part);
-                  formattedContent += currentBlock.join('\n') + '\n\n';
-                  currentBlock = [];
-                }
-              } else if (inCodeBlock) {
-                // Thêm dòng vào code block hiện tại, giữ nguyên khoảng trắng
-                currentBlock.push(part);
-              } else {
-                // Dòng bình thường, thêm vào block hiện tại
-                formattedContent += part + '\n';
-              }
-            }
-          });
-
-          // Xử lý block cuối cùng nếu có
-          if (currentBlock.length > 0) {
-            formattedContent += currentBlock.join('\n') + '\n';
-          }
-
-          content = formattedContent.trim();
-        }
-
-        // Convert markdown to HTML
-        messageBubble.innerHTML = marked.parse(content);
-
-        // Apply syntax highlighting to code blocks
-        messageBubble.querySelectorAll('pre code').forEach((block) => {
-          hljs.highlightBlock(block);
-
-          // Check if this is a copyable code block
-          const preElement = block.parentElement;
-          if (
-            preElement &&
-            block.className.includes('language-python:copyable')
-          ) {
-            // Create code actions container
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'code-actions';
-
-            // Create "Replace Code" button
-            const replaceButton = document.createElement('button');
-            replaceButton.className = 'code-button';
-            replaceButton.textContent = 'Thay thế code';
-            replaceButton.onclick = () => {
-              const code = block.textContent;
-              if (window.editor) {
-                window.editor.setValue(code);
-                window.editor.focus();
-                showNotification('Đã thay thế code trong editor');
-              }
-            };
-
-            // Create "Insert Code" button
-            const insertButton = document.createElement('button');
-            insertButton.className = 'code-button';
-            insertButton.textContent = 'Chèn code';
-            insertButton.onclick = () => {
-              const code = block.textContent;
-              if (window.editor) {
-                const position = window.editor.getPosition();
-                const selection = window.editor.getSelection();
-
-                if (selection && !selection.isEmpty()) {
-                  // If there's a selection, replace it
-                  window.editor.executeEdits('', [
-                    {
-                      range: selection,
-                      text: code,
-                      forceMoveMarkers: true,
-                    },
-                  ]);
-                } else {
-                  // Insert at cursor position
-                  window.editor.executeEdits('', [
-                    {
-                      range: new monaco.Range(
-                        position.lineNumber,
-                        position.column,
-                        position.lineNumber,
-                        position.column
-                      ),
-                      text: code,
-                      forceMoveMarkers: true,
-                    },
-                  ]);
-                }
-                window.editor.focus();
-                showNotification('Đã chèn code vào vị trí con trỏ');
-              }
-            };
-
-            // Add buttons to actions container
-            actionsDiv.appendChild(replaceButton);
-            actionsDiv.appendChild(insertButton);
-
-            // Add actions to pre element
-            preElement.style.position = 'relative';
-            preElement.appendChild(actionsDiv);
-          }
+      require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+          value: '# Viết code của bạn ở đây',
+          language: 'python',
+          theme: 'vs-dark',
+          automaticLayout: true,
+          minimap: {
+            enabled: false,
+          },
         });
 
-        messageDiv.appendChild(messageBubble);
-        messageContainer.appendChild(messageDiv);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+        // Generate initial exercise
+        generateExercise();
+      });
 
-        // Update chat history
-        chatHistory.push({
-          role: isUser ? 'user' : 'assistant',
-          content: content,
+      function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach((button) => {
+          button.classList.remove('active');
         });
+        document
+          .querySelector(`.tab-button[onclick="switchTab('${tabName}')"]`)
+          .classList.add('active');
+
+        // Update tab contents
+        document.querySelectorAll('.tab-content').forEach((content) => {
+          content.classList.remove('active');
+        });
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+
+        currentTab = tabName;
       }
 
-      // Add welcome message on load
-      addMessage(welcomeMessage, false);
-
-      chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = messageInput.value.trim();
-        if (!message) return;
-
-        // Add user message
-        addMessage(message, true);
-        messageInput.value = '';
-
-        // Add thinking indicator
-        const thinking = createThinkingIndicator();
-        messageContainer.appendChild(thinking);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+      async function generateExercise() {
+        if (isGenerating) return; // Prevent multiple simultaneous generations
 
         try {
-          const response = await fetch('/chat', {
+          isGenerating = true;
+
+          // Show loading screen
+          document.getElementById('loadingOverlay').classList.add('show');
+
+          // Disable generate button
+          const generateButton = document.querySelector('.generate-button');
+          if (generateButton) {
+            generateButton.disabled = true;
+          }
+
+          const response = await fetch('/generate_exercise', {
+            method: 'POST',
+          });
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const exercise = await response.json();
+          currentExercise = exercise;
+
+          // Update exercise sections with proper markdown rendering
+          document.getElementById('description').innerHTML = marked.parse(
+            exercise.description
+          );
+          document.getElementById('example').innerHTML = marked.parse(
+            exercise.example.replace(/\n```\n/g, '\n```\n\n')
+          );
+          document.getElementById('example-output').innerHTML = marked.parse(
+            exercise.example_output
+          );
+          document.getElementById('explanation').innerHTML = marked.parse(
+            exercise.explanation
+          );
+
+          // Update editor with function template
+          // Decode any HTML entities and normalize newlines
+          const functionCode = exercise.function
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n');
+
+          editor.setValue(functionCode);
+
+          // Clear output
+          clearOutput();
+          clearTestOutput();
+
+          // Apply syntax highlighting
+          document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightBlock(block);
+          });
+        } catch (error) {
+          console.error('Error:', error);
+          document.getElementById('output').textContent =
+            'Error generating exercise: ' + error.message;
+        } finally {
+          // Hide loading screen
+          document.getElementById('loadingOverlay').classList.remove('show');
+
+          // Re-enable generate button
+          const generateButton = document.querySelector('.generate-button');
+          if (generateButton) {
+            generateButton.disabled = false;
+          }
+
+          isGenerating = false;
+        }
+      }
+
+      async function runCode() {
+        const code = editor.getValue();
+
+        try {
+          const response = await fetch('/run_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              message: message,
-              code: window.editor ? window.editor.getValue() : '',
-              history: chatHistory,
-              terminal_output: lastTerminalOutput,
-            }),
+            body: JSON.stringify({ code: code }),
           });
 
-          // Remove thinking indicator
-          thinking.remove();
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
 
           const data = await response.json();
-          addMessage(data.response);
+          document.getElementById('output').textContent = data.output;
+
+          // Switch to output tab
+          switchTab('output');
         } catch (error) {
-          // Remove thinking indicator
-          thinking.remove();
-
           console.error('Error:', error);
-          addMessage('Xin lỗi, đã có lỗi xảy ra khi xử lý yêu cầu của bạn.');
+          document.getElementById('output').textContent =
+            'Error running code: ' + error.message;
         }
-      });
+      }
 
-      // Run code button handler
-      runButton.addEventListener('click', async () => {
-        const code = window.editor.getValue();
+      async function runTests() {
+        const code = editor.getValue();
+
         try {
-          // Clear previous output
-          outputContainer.innerHTML = '';
+          // Add unit tests to the code
+          let fullCode = code;
+          if (currentExercise && currentExercise.unit_test) {
+            fullCode = code + '\n\n' + currentExercise.unit_test;
+            fullCode +=
+              '\n\nif __name__ == "__main__":\n    unittest.main(argv=[""])';
+          }
 
           const response = await fetch('/run_code', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ code: fullCode }),
           });
 
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
           const data = await response.json();
-          // Replace newlines with <br> and preserve whitespace
-          const formattedOutput = data.output.replace(/\n/g, '<br>');
-          outputContainer.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${formattedOutput}</pre>`;
-          lastTerminalOutput = data.output;
+          const output = data.output;
+
+          // Format test output
+          if (output.includes('OK')) {
+            document.getElementById('test-output').innerHTML =
+              '<span class="success">✓ Tất cả các test đều pass!</span>\n\n' +
+              output;
+          } else {
+            document.getElementById('test-output').innerHTML =
+              '<span class="error">✗ Có test cases bị fail:</span>\n\n' +
+              output;
+          }
+
+          // Switch to test tab
+          switchTab('test');
         } catch (error) {
           console.error('Error:', error);
-          const errorOutput = `<pre class="text-red-500">Error running code: ${error.message}</pre>`;
-          outputContainer.innerHTML = errorOutput;
-          lastTerminalOutput = `Error running code: ${error.message}`;
+          document.getElementById('test-output').textContent =
+            'Error running tests: ' + error.message;
         }
-      });
+      }
 
-      // Clear output button handler
-      clearButton.addEventListener('click', () => {
-        outputContainer.innerHTML = '';
-      });
+      function clearOutput() {
+        document.getElementById('output').textContent = '';
+      }
 
-      // Focus input on load
-      messageInput.focus();
+      function clearTestOutput() {
+        document.getElementById('test-output').textContent = '';
+      }
     </script>
   </body>
 </html>

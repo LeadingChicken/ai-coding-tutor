@@ -14,6 +14,7 @@ AI Coding Tutor là một ứng dụng web tương tác giúp học viên học 
 
 - Python 3.8+
 - Anthropic API key
+- OpenAI API key
 
 ## Cài đặt
 
@@ -54,6 +55,8 @@ File `.env` cần có các biến môi trường sau:
 ANTHROPIC_API_KEY=your_api_key_here
 ANTHROPIC_TEMPERATURE=0.7
 ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 ⚠️ **Lưu ý bảo mật**:
@@ -74,7 +77,7 @@ python main.py
 
 ## Cấu trúc project
 
-```
+```bash
 ai-coding-tutor/
 ├── app/
 │   ├── agent.py      # AI tutor agent logic
@@ -83,7 +86,7 @@ ai-coding-tutor/
 ├── static/           # Static files (CSS, JS)
 ├── templates/        # HTML templates
 ├── main.py          # FastAPI application
-├── .env.example     # Mẫu file cấu hình
+├── .env    # Mẫu file cấu hình, bạn hãy tạo nó
 ├── .gitignore       # Git ignore rules
 └── requirements.txt  # Project dependencies
 ```
@@ -91,19 +94,8 @@ ai-coding-tutor/
 ## Công nghệ sử dụng
 
 - **Backend**: FastAPI
-- **AI/ML**: OpenAI API, LangChain
-- **Frontend**: HTML, CSS, JavaScript
-- **Dependencies**:
-  - fastapi==0.104.1
-  - uvicorn==0.24.0
-  - python-dotenv==1.0.0
-  - openai==1.3.5
-  - langchain==0.0.350
-  - langchain-openai==0.0.2
-  - pydantic==2.5.2
-  - python-multipart==0.0.8
-  - markdown2==2.4.10
-  - pygments==2.17.2
+- **AI/ML**: OpenAI API, LangChain, Anthropic API
+- **Frontend**: HTML, CSS, JavaScript, Vue.js
 
 ## Đóng góp
 

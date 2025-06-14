@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Python Lists - Theory</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <nav class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Python Theory</h1>
+        <div>
+          <a
+            href="/"
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Go to Practice
+          </a>
+        </div>
+      </nav>
+
+      <div id="theory-content" class="space-y-8">
+        <!-- Content will be loaded dynamically -->
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+
+    <script>
+      async function loadTheory() {
+        try {
+          const response = await fetch('/theory/lists');
+          const data = await response.json();
+
+          const theoryContent = document.getElementById('theory-content');
+
+          // Add title
+          const titleElement = document.createElement('h2');
+          titleElement.className = 'text-2xl font-bold text-gray-800 mb-4';
+          titleElement.textContent = data.title;
+          theoryContent.appendChild(titleElement);
+
+          // Add sections
+          data.sections.forEach((section) => {
+            // Section container
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'bg-white rounded-lg shadow-md p-6 mb-6';
+
+            // Section title
+            const sectionTitle = document.createElement('h3');
+            sectionTitle.className = 'text-xl font-semibold text-gray-800 mb-4';
+            sectionTitle.textContent = section.title;
+            sectionDiv.appendChild(sectionTitle);
+
+            // Section content
+            const content = document.createElement('div');
+            content.className = 'prose max-w-none mb-4';
+            content.innerHTML = section.content.replace(/\n/g, '<br>');
+            sectionDiv.appendChild(content);
+
+            // Example code
+            if (section.example) {
+              const exampleContainer = document.createElement('div');
+              exampleContainer.className = 'mt-4';
+
+              const exampleTitle = document.createElement('h4');
+              exampleTitle.className = 'text-lg font-medium text-gray-700 mb-2';
+              exampleTitle.textContent = 'Example:';
+              exampleContainer.appendChild(exampleTitle);
+
+              const pre = document.createElement('pre');
+              const code = document.createElement('code');
+              code.className = 'language-python';
+              code.textContent = section.example;
+              pre.appendChild(code);
+              exampleContainer.appendChild(pre);
+
+              sectionDiv.appendChild(exampleContainer);
+            }
+
+            theoryContent.appendChild(sectionDiv);
+          });
+
+          // Add practice questions
+          if (data.practice_questions && data.practice_questions.length > 0) {
+            const questionsDiv = document.createElement('div');
+            questionsDiv.className = 'bg-white rounded-lg shadow-md p-6';
+
+            const questionsTitle = document.createElement('h3');
+            questionsTitle.className =
+              'text-xl font-semibold text-gray-800 mb-4';
+            questionsTitle.textContent = 'Practice Questions';
+            questionsDiv.appendChild(questionsTitle);
+
+            data.practice_questions.forEach((question, index) => {
+              const questionDiv = document.createElement('div');
+              questionDiv.className = 'mb-4 p-4 bg-gray-50 rounded';
+
+              const questionText = document.createElement('p');
+              questionText.className = 'font-medium text-gray-800 mb-2';
+              questionText.textContent = `${index + 1}. ${question.question}`;
+              questionDiv.appendChild(questionText);
+
+              const answerButton = document.createElement('button');
+              answerButton.className =
+                'bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded text-sm mt-2';
+              answerButton.textContent = 'Show Answer';
+              answerButton.onclick = () => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'mt-2 text-gray-700';
+                answerDiv.innerHTML = `
+                                <strong>Answer:</strong> ${question.answer}<br>
+                                <strong>Explanation:</strong> ${question.explanation}
+                            `;
+                questionDiv.appendChild(answerDiv);
+                answerButton.style.display = 'none';
+              };
+              questionDiv.appendChild(answerButton);
+
+              questionsDiv.appendChild(questionDiv);
+            });
+
+            theoryContent.appendChild(questionsDiv);
+          }
+
+          // Highlight code blocks
+          Prism.highlightAll();
+        } catch (error) {
+          console.error('Error loading theory:', error);
+          document.getElementById('theory-content').innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        Failed to load theory content. Please try refreshing the page.
+                    </div>
+                `;
+        }
+      }
+
+      // Load theory content when page loads
+      document.addEventListener('DOMContentLoaded', loadTheory);
+    </script>
+  </body>
+</html>

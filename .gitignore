@@ -35,3 +35,15 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db 
+
+#add node_modules
+node_modules/
+
+#add package-lock.json
+package-lock.json
+
+#add package.json
+package.json
+
+#add .env
+.env

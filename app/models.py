@@ -19,4 +19,6 @@ class AgentResponse(BaseModel):
     final_answer: str
 
 class CodeRequest(BaseModel):
-    code: str 
+    """Model for code execution requests."""
+    code: str
+    unit_test: Optional[str] = None 
