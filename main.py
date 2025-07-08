@@ -14,6 +14,7 @@ from app.agent import get_agent_response
 from app.code_executor import run_python_code
 from app.generate_exercise import generate_exercise, extract_description, extract_example, extract_explanation, extract_function, extract_unit_test, extract_example_output
 from app.theory import ListTheory
+from app.theory_chat import get_theory_chat_response
 
 # Load environment variables
 load_dotenv()
@@ -43,6 +44,14 @@ class ChatRequest(BaseModel):
     terminal_output: Optional[str] = None
     exercise: Optional[Dict[str, str]] = None
     is_code_evaluation: Optional[bool] = False
+
+class TheoryChatRequest(BaseModel):
+    message: str
+    history: List[Dict]
+    theory_context: str
+
+class ExerciseRequest(BaseModel):
+    topic: str
 
 def run_unit_tests(code: str, unit_test: str) -> str:
     # Kết hợp code của học viên với unit test
@@ -149,10 +158,12 @@ async def theory_page(request: Request):
     )
 
 @app.post("/generate_exercise")
-async def generate_exercise_endpoint():
+async def generate_exercise_endpoint(request: ExerciseRequest):
     """Generate a new Python exercise."""
-    content = generate_exercise()
+    print(request.topic)
+    content = generate_exercise(request.topic)
     
+    print(extract_unit_test(content))
     return {
         "description": extract_description(content),
         "example": extract_example(content),
@@ -219,10 +230,60 @@ async def test_code_endpoint(request: ChatRequest):
         "agent_response": agent_response
     }
 
-@app.get("/theory/lists")
-async def get_list_theory():
-    """Get the theory content for Python Lists."""
-    return ListTheory.get_list_theory()
+@app.get("/api/theory/{lesson_id}")
+async def get_theory(lesson_id: str):
+    """Get theory content for a specific lesson."""
+    theory_dir = os.path.join(os.path.dirname(__file__), "app", "theory")
+    theory_file = os.path.join(theory_dir, f"{lesson_id}.md")
+    
+    if not os.path.exists(theory_file):
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    try:
+        with open(theory_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        # Parse markdown content into sections
+        sections = []
+        current_title = None
+        current_content = []
+        
+        for line in content.split('\n'):
+            # Only process level 2 headings (##)
+            if line.startswith('## '):
+                # Save previous section if exists
+                if current_title is not None:
+                    sections.append({
+                        "title": current_title,
+                        "content": '\n'.join(current_content).strip()
+                    })
+                # Start new section
+                current_title = line[3:].strip()
+                current_content = []
+            else:
+                # Add line to current content
+                current_content.append(line)
+        
+        # Add the last section
+        if current_title is not None:
+            sections.append({
+                "title": current_title,
+                "content": '\n'.join(current_content).strip()
+            })
+        
+        return {"content": sections}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/theory_chat")
+async def theory_chat_endpoint(request: TheoryChatRequest):
+    response = await get_theory_chat_response(
+        message=request.message,
+        history=request.history,
+        theory_context=request.theory_context
+    )
+    return {"response": response}
 
 if __name__ == "__main__":
     import uvicorn

@@ -47,6 +47,7 @@ import CodeEditor from '../components/CodeEditor.vue'
 import Terminal from '../components/Terminal.vue'
 import ChatBox from '../components/ChatBox.vue'
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'PracticeView',
@@ -57,6 +58,7 @@ export default {
     ChatBox,
   },
   setup() {
+    const route = useRoute()
     const codeEditor = ref(null)
     const terminal = ref(null)
     const chatBox = ref(null)
@@ -169,11 +171,17 @@ export default {
     const generateExercise = async () => {
       isGenerating.value = true
       try {
+        const lessonId = route.params.lessonId
+        if (!lessonId) {
+          throw new Error('Lesson ID is required')
+        }
+        console.log('Generating exercise for lesson:', lessonId)
         const response = await fetch('http://localhost:8000/generate_exercise', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ topic: lessonId }),
         })
 
         if (!response.ok) {
@@ -190,6 +198,8 @@ export default {
         }
       } catch (error) {
         console.error('Error:', error)
+        terminalOutput.value = error instanceof Error ? error.message : 'An error occurred'
+        activeTab.value = 'output'
       } finally {
         isGenerating.value = false
       }

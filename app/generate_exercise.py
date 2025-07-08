@@ -6,19 +6,13 @@ from openai import OpenAI
 # Load environment variables
 load_dotenv()
 
-def get_topic():
-    """Return a random topic from the list of available topics."""
-    topics = ["list", "dictionary", "set"]
-    return random.choice(topics)
-
 def get_context():
-    """Return a random context from the list of available contexts."""
+    """Return 2 random context from the list of available contexts."""
     contexts = ["leo núi", "câu cá", "mối quan hệ", "bóng đá", "âm nhạc", "sách", "nấu ăn"]
-    return random.choice(contexts)
+    return random.sample(contexts, 2)
 
-def generate_exercise():
+def generate_exercise(topic):
     """Generate a Python exercise using GPT-4 based on random topic and context."""
-    topic = get_topic()
     context = get_context()
     print(topic, context)
     
@@ -30,7 +24,7 @@ def generate_exercise():
     Mô tả: Viết một hàm `fish_stats(fish_counts: List[int]) -> List[int]` nhận vào danh sách `fish_counts`, trong đó mỗi phần tử đại diện cho số cá câu được trong một lần ra hồ. Hàm cần trả về một danh sách gồm:
     - Tổng số lần câu cá.
     - Tổng số cá đã câu được.
-    - Số lần không câu được con cá nào (giá trị = 0).
+    - Số lần không câu được con cá nào (gi  á trị = 0).
     - Số lần câu được trên 5 con cá.
     Ví dụ:
     ```python
@@ -73,7 +67,7 @@ def generate_exercise():
     ```
     
     ----------------------------
-    Hãy tạo một bài tập Python giống ví dụ trên về chủ đề {topic} với ngữ cảnh về {context}.
+    Hãy tạo một bài tập Python giống ví dụ trên về chủ đề {topic} với ngữ cảnh về {context[0]} và {context[1]}.
     Bài tập phải có format như sau:
     - Mô tả:
     - Ví dụ:

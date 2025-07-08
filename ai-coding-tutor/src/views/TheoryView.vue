@@ -14,11 +14,23 @@
         <!-- Chat Messages -->
         <div class="messages-container" ref="chatContainer">
           <div v-for="(message, index) in displayedMessages" :key="index" class="message-item">
-            <div class="message-content">
-              <h3 v-if="message.title" class="message-title">
-                {{ message.title }}
-              </h3>
-              <div class="message-body markdown-body" v-html="formatContent(message.content)"></div>
+            <div class="message-wrapper">
+              <div class="avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
+                  />
+                </svg>
+              </div>
+              <div class="message-content">
+                <h3 v-if="message.title" class="message-title">
+                  {{ message.title }}
+                </h3>
+                <div
+                  class="message-body markdown-body"
+                  v-html="formatContent(message.content)"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -32,38 +44,40 @@
           >
             Tiếp tục
           </button>
-          <div v-else class="completion-message">
-            Bạn đã hoàn thành phần lý thuyết! Hãy chuyển sang phần Bài tập để kiểm tra kiến thức.
-          </div>
+          <button v-else @click="goToPractice" class="practice-button">Chuyển đến Bài tập</button>
         </div>
       </div>
     </div>
+    <TheoryChatBox
+      :theory-context="
+        displayedMessages.map((m) => (m.title ? m.title + '\n' : '') + m.content).join('\n\n')
+      "
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { marked } from 'marked'
-import Prism from 'prismjs'
-import 'prismjs/themes/prism-tomorrow.css'
-import 'prismjs/components/prism-python'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import 'prismjs/plugins/toolbar/prism-toolbar.css'
-import 'prismjs/plugins/toolbar/prism-toolbar'
-import 'prismjs/plugins/copy-to-clipboard/prism-copy-to-clipboard'
+import hljs from 'highlight.js'
+import 'highlight.js/lib/languages/python'
+import TheoryChatBox from '../components/TheoryChatBox.vue'
+import { useRoute, useRouter } from 'vue-router'
 
-// Configure marked with Prism
+// Configure marked
 marked.setOptions({
-  highlight: function (code: string, lang: string) {
-    if (Prism.languages[lang]) {
-      return Prism.highlight(code, Prism.languages[lang], lang)
-    }
-    return code
-  },
   breaks: true,
   gfm: true,
 })
+
+// Add custom renderer for code blocks
+const renderer = new marked.Renderer()
+renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
+  const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'plaintext'
+  const highlighted = hljs.highlight(text, { language: validLanguage }).value
+  return `<pre><code class="hljs language-${validLanguage}">${highlighted}</code></pre>`
+}
+marked.use({ renderer })
 
 interface TheoryItem {
   title: string
@@ -76,59 +90,31 @@ interface DisplayMessage {
   isSystem: boolean
 }
 
-// Hardcoded theory content
-const theoryContent: TheoryItem[] = [
-  {
-    title: 'Python cơ bản',
-    content:
-      'Python là một ngôn ngữ lập trình cao cấp, dễ học và phù hợp cho cả người mới học và người có kinh nghiệm.',
-  },
-  {
-    title: 'Kiểu dữ liệu và biến trong Python',
-    content:
-      'Trong Python, bạn có thể lưu trữ dữ liệu trong các biến. Các kiểu dữ liệu chính là:\n\n- Số (int, float)\n- Chuỗi (text)\n- Boolean (True/False)\n- Danh sách (collections)\n\nVí dụ:\n```python\nage = 25          # số nguyên\nname = "John"     # chuỗi\nis_student = True # boolean\n```',
-  },
-  {
-    title: 'Cấu trúc điều kiện trong Python',
-    content:
-      'Python sử dụng cấu trúc điều kiện để xác định các khối mã được thực thi. Dưới đây là cách hoạt động của các câu lệnh if:\n\n```python\nif condition:\n    # làm gì đó\nelif another_condition:\n    # làm gì đó khác\nelse:\n    # làm gì đó mặc định\n```',
-  },
-  {
-    title: 'Vòng lặp trong Python',
-    content:
-      'Python có hai loại vòng lặp chính:\n\n1. Vòng lặp for:\n```python\nfor i in range(5):\n    print(i)\n```\n\n2. Vòng lặp while:\n```python\nwhile condition:\n    # làm gì đó\n```',
-  },
-  {
-    title: 'Hàm trong Python',
-    content:
-      'Hàm giúp chúng ta tổ chức và tái sử dụng mã:\n\n```python\ndef greet(name):\n    return f"Hello, {name}!"\n\n# Sử dụng hàm\nresult = greet("Alice")\nprint(result)  # Outputs: Hello, Alice!\n```',
-  },
-]
-
+const route = useRoute()
+const router = useRouter()
 const loading = ref(true)
 const error = ref('')
 const currentIndex = ref(-1)
 const displayedMessages = ref<DisplayMessage[]>([])
 const chatContainer = ref<HTMLElement | null>(null)
+const theoryContent = ref<TheoryItem[]>([])
 
 const formatContent = (content: string): string => {
-  const html = marked(content) as string
-  return html.replace(
-    /<pre><code class="language-(\w+)">/g,
-    '<pre class="line-numbers"><code class="language-$1">',
-  )
+  return marked(content) as string
 }
 
 const highlightCode = () => {
   nextTick(() => {
-    Prism.highlightAll()
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightElement(block as HTMLElement)
+    })
   })
 }
 
 const showNextContent = () => {
-  if (currentIndex.value < theoryContent.length - 1) {
+  if (currentIndex.value < theoryContent.value.length - 1) {
     currentIndex.value++
-    const item = theoryContent[currentIndex.value]
+    const item = theoryContent.value[currentIndex.value]
     displayedMessages.value.push({
       title: item.title,
       content: item.content,
@@ -144,9 +130,29 @@ const showNextContent = () => {
   }
 }
 
+const fetchTheoryContent = async () => {
+  try {
+    const lessonId = route.params.lessonId
+    const response = await fetch(`http://localhost:8000/api/theory/${lessonId}`)
+    if (!response.ok) {
+      throw new Error('Failed to load theory content')
+    }
+    const data = await response.json()
+    theoryContent.value = data.content
+    loading.value = false
+    showNextContent()
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'An error occurred'
+    loading.value = false
+  }
+}
+
+const goToPractice = () => {
+  router.push(`/practice/${route.params.lessonId}`)
+}
+
 onMounted(() => {
-  loading.value = false
-  showNextContent()
+  fetchTheoryContent()
 
   // Set up observer for dynamic content
   const observer = new MutationObserver(() => {
@@ -200,11 +206,35 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
+.message-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.avatar svg {
+  width: 24px;
+  height: 24px;
+}
+
 .message-content {
   background-color: #e4e7e7;
   border-radius: 0.5rem;
   padding: 1.25rem;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  flex: 1;
 }
 
 .message-title {
@@ -215,8 +245,8 @@ onMounted(() => {
 }
 
 /* Code block styles */
-pre[class*='language-'] {
-  background: #282c34 !important;
+pre {
+  background: #282a36 !important;
   border-radius: 4px !important;
   margin: 0.75rem 0 !important;
   padding: 0.75rem !important;
@@ -224,11 +254,78 @@ pre[class*='language-'] {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
 
-code[class*='language-'] {
+code {
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace !important;
   font-size: 0.875rem !important;
   line-height: 1.4 !important;
   text-shadow: none !important;
+}
+
+/* Dracula theme colors */
+.hljs {
+  color: #f8f8f2;
+  background: #282a36;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #ff79c6;
+}
+
+.hljs-function .hljs-keyword {
+  color: #ff79c6;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #f1fa8c;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: #6272a4;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-title,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-literal,
+.hljs-number,
+.hljs-params {
+  color: #bd93f9;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
 }
 
 /* Markdown content */
@@ -254,12 +351,18 @@ code[class*='language-'] {
 .markdown-body ul,
 .markdown-body ol {
   margin: 0.25rem 0;
-  padding-left: 1rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.markdown-body ul {
+  list-style-position: inside;
 }
 
 .markdown-body li {
-  margin: 0.125rem 0;
-  line-height: 1.4;
+  margin: 0.1rem 0;
+  line-height: 1.3;
+  padding-left: 0;
 }
 
 .markdown-body li > p {
@@ -280,6 +383,43 @@ code[class*='language-'] {
 /* Adjust spacing for paragraphs inside list items */
 .markdown-body li > p + p {
   margin-top: 0.25rem;
+}
+
+/* Table styles */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.markdown-body table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.markdown-body table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.markdown-body table tr:hover {
+  background-color: #f3f4f6;
+}
+
+.markdown-body table code {
+  background-color: #f1f5f9;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+  color: #0f172a;
 }
 
 /* Adjust spacing between list and other elements */
@@ -327,10 +467,13 @@ div.code-toolbar > .toolbar > .toolbar-item > button:hover {
   padding: 1rem;
   background-color: white;
   border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
 }
 
 .continue-button {
-  width: 100%;
+  width: auto;
+  min-width: 120px;
   background-color: #3b82f6;
   color: white;
   font-weight: 600;
@@ -344,13 +487,19 @@ div.code-toolbar > .toolbar > .toolbar-item > button:hover {
   background-color: #2563eb;
 }
 
-.completion-message {
-  text-align: center;
-  color: #6b7280;
-  padding: 0.75rem;
+.practice-button {
+  width: auto;
+  min-width: 120px;
+  background-color: #10b981;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
   font-size: 1rem;
 }
 
-/* Keep the syntax highlighting colors */
-/* ... rest of your token color styles ... */
+.practice-button:hover {
+  background-color: #059669;
+}
 </style>

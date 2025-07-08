@@ -30,84 +30,15 @@
 <script>
 import { marked } from 'marked'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
 
 // Configure marked to use highlight.js
 marked.setOptions({
   highlight: function (code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(code, { language: lang }).value
-      } catch (err) {}
-    }
-    return hljs.highlightAuto(code).value
+    return hljs.highlight(code, { language: 'python' }).value
   },
   breaks: true,
   gfm: true,
 })
-
-// Override highlight.js theme
-const style = document.createElement('style')
-style.textContent = `
-  .hljs {
-    background: #282a36;
-    color: #f8f8f2;
-  }
-  /* Keywords như def, class, return */
-  .hljs-keyword,
-  .hljs-selector-tag,
-  .hljs-literal,
-  .hljs-section,
-  .hljs-link {
-    color: #ff79c6;
-  }
-  /* Tên hàm */
-  .hljs-function .hljs-title,
-  .hljs-title.function_ {
-    color: #50fa7b;
-  }
-  /* Strings */
-  .hljs-string {
-    color: #f1fa8c;
-  }
-  /* Numbers */
-  .hljs-number {
-    color: #bd93f9;
-  }
-  /* Built-in functions */
-  .hljs-built_in {
-    color: #8be9fd;
-  }
-  /* Comments */
-  .hljs-comment {
-    color: #6272a4;
-  }
-  /* Property names trong dictionary */
-  .hljs-attr {
-    color: #50fa7b;
-  }
-  /* Dấu ngoặc và các ký tự đặc biệt */
-  .hljs-punctuation {
-    color: #f8f8f2;
-  }
-  /* Boolean values */
-  .hljs-literal {
-    color: #bd93f9;
-  }
-  /* Class names */
-  .hljs-class .hljs-title {
-    color: #50fa7b;
-  }
-  /* Function parameters */
-  .hljs-params {
-    color: #f8f8f2;
-  }
-  /* Operators */
-  .hljs-operator {
-    color: #ff79c6;
-  }
-`
-document.head.appendChild(style)
 
 export default {
   name: 'ExercisePanel',
@@ -320,5 +251,63 @@ export default {
 
 .markdown-content :deep(th) {
   background-color: #f3f4f6;
+}
+
+/* Dracula theme for highlight.js */
+.hljs {
+  color: #f8f8f2;
+  background: #282a36;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #ff79c6;
+}
+.hljs-function .hljs-keyword {
+  color: #ff79c6;
+}
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #f1fa8c;
+}
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: #6272a4;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-title,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  font-weight: bold;
+}
+.hljs-literal,
+.hljs-number,
+.hljs-params {
+  color: #bd93f9;
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: bold;
+}
+.hljs-link {
+  text-decoration: underline;
 }
 </style>

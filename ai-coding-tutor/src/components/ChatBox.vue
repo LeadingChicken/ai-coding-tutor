@@ -30,7 +30,7 @@
           :key="index"
           :class="['message', message.role === 'user' ? 'user-message' : 'tutor-message']"
         >
-          <div class="message-content">{{ message.content }}</div>
+          <div class="message-content" v-html="renderMarkdown(message.content)"></div>
         </div>
       </div>
       <div class="chat-input">
@@ -63,6 +63,17 @@
 
 <script>
 import { ref, onMounted, nextTick, toRefs } from 'vue'
+import { marked } from 'marked'
+import hljs from 'highlight.js'
+import 'highlight.js/lib/languages/python'
+
+// Configure marked to use highlight.js
+marked.setOptions({
+  highlight: function (code, lang) {
+    const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'python'
+    return hljs.highlight(code, { language: validLanguage }).value
+  },
+})
 
 export default {
   name: 'ChatBox',
@@ -181,17 +192,12 @@ export default {
       }
     }
 
+    const renderMarkdown = (content) => marked.parse(content)
+
     onMounted(() => {
       addMessage({
         role: 'assistant',
-        content: `Xin chào! Tôi là AI tutor. Tôi có thể giúp bạn:
-
-- Review và giải thích code của bạn
-- Gợi ý cách làm bài tập
-- Giải đáp thắc mắc về lập trình
-- Phân tích lỗi và đề xuất cách sửa
-
-Hãy đặt câu hỏi cho tôi!`,
+        content: `Xin chào! Tôi là AI tutor. Tôi có thể giúp bạn:\n\n- Review và giải thích code của bạn\n- Gợi ý cách làm bài tập\n- Giải đáp thắc mắc về lập trình\n- Phân tích lỗi và đề xuất cách sửa\n\nHãy đặt câu hỏi cho tôi!`,
       })
     })
 
@@ -205,6 +211,7 @@ Hãy đặt câu hỏi cho tôi!`,
       sendMessage,
       addMessage,
       toggleChat,
+      renderMarkdown,
     }
   },
 }
@@ -350,14 +357,76 @@ Hãy đặt câu hỏi cho tôi!`,
 .message-content {
   white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.5;
-  color: #1f2937;
+  line-height: 1.6;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
 }
 
-.user-message .message-content {
-  color: white;
+/* Dracula theme for code blocks */
+.message-content pre {
+  background-color: #282a36;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
 }
 
+.message-content code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+.message-content pre code {
+  color: #f8f8f2;
+}
+
+/* Python syntax highlighting */
+.message-content .hljs-keyword {
+  color: #ff79c6;
+}
+
+.message-content .hljs-string {
+  color: #f1fa8c;
+}
+
+.message-content .hljs-number {
+  color: #bd93f9;
+}
+
+.message-content .hljs-comment {
+  color: #6272a4;
+}
+
+.message-content .hljs-function {
+  color: #50fa7b;
+}
+
+.message-content .hljs-class {
+  color: #8be9fd;
+}
+
+.message-content .hljs-built_in {
+  color: #ffb86c;
+}
+
+.message-content .hljs-operator {
+  color: #ff79c6;
+}
+
+.message-content .hljs-variable {
+  color: #f8f8f2;
+}
+
+.message-content .hljs-params {
+  color: #f8f8f2;
+}
+
+.user-message .message-content,
+.user-message .message-content * {
+  background: transparent !important;
+  color: white !important;
+}
 .tutor-message .message-content {
   color: #1f2937;
 }

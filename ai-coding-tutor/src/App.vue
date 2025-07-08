@@ -6,7 +6,7 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-2xl font-bold text-gray-800">AI Programming Tutor</h1>
+              <h1 class="text-2xl font-bold text-gray-800">Gia sư lập trình AI</h1>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -18,9 +18,9 @@
               Lí thuyết
             </router-link>
             <router-link
-              to="/practice"
+              :to="currentLessonId ? `/practice/${currentLessonId}` : '/'"
               class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-              :class="{ 'bg-blue-600': $route.path === '/practice' }"
+              :class="{ 'bg-blue-600': $route.path.startsWith('/practice') }"
             >
               Bài tập
             </router-link>
@@ -34,7 +34,20 @@
 </template>
 
 <script setup lang="ts">
-// No setup needed for now
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const currentLessonId = computed(() => {
+  if (route.params.lessonId) {
+    return route.params.lessonId
+  }
+  // Nếu đang ở trang practice, lấy lessonId từ URL
+  if (route.path.startsWith('/practice/')) {
+    return route.params.lessonId
+  }
+  return null
+})
 </script>
 
 <style>
